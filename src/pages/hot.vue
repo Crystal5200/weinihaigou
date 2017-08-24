@@ -1,7 +1,7 @@
 <template>
 <div>
      <div class="header clearfix">
-        <a href="/m-html/goods/shop-car.html" class="shopping-logo"></a>
+        <router-link to="/shopCar" class="shopping-logo"><span v-html="$store.state.carCount"></span></router-link>
         <h1>热门推荐</h1>
         <a href="javascript:history.go(-1)" class="header-back"></a>
     </div>
