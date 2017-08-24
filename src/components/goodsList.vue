@@ -103,7 +103,7 @@ export default {
                             // 没有数据
                             if( oThis.goodsList.length===0 ) {
                                 oThis.isLoading = false;
-                                this.noNum  = true;
+                                oThis.noNum  = true;
                             }
                         } else {
                             oThis.goodsList = oThis.goodsList.concat(data.list);
