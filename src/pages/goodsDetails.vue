@@ -844,11 +844,8 @@ export default {
 /*鍟嗗搧搴曢儴寮€濮�*/
 .goods-footer {
     display: -webkit-flex;
-    display: flex;
     -webkit-justify-content: space-between;
-    justify-content: space-between;
     -webkit-align-items: center;
-    align-items: center;
     position: fixed;
     left: 0;
     bottom: 0;
