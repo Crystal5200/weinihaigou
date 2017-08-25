@@ -37,11 +37,8 @@ body {
 }
 .com-footer ul {
     display: -webkit-flex;
-    display: flex;
     -webkit-justify-content: space-around;
-    justify-content: space-around;
     -webkit-align-items:center;
-    align-items: center;
     height: 45px;
 }
 .com-footer li {
