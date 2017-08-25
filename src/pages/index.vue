@@ -136,11 +136,8 @@ export default {
 /*nav开始*/
 .nav {
     display: -webkit-flex;
-    display: flex;
     -webkit-justify-content:space-around;
-    justify-content: space-around;
     -webkit-align-items:center;
-    align-items: center;
     padding: 0.75rem 0;
     background-color: #fff;
     border-bottom: 1px solid #ebebeb;
