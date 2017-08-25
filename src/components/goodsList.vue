@@ -217,9 +217,6 @@ export default {
 }
 .com-goods-list li a {
     display: block;
-    height: 100%;
-    overflow:hidden;
-    background-color: #fff;
 }
 .com-goods-list .com-none {
     opacity: 0;
