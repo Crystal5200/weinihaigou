@@ -1,7 +1,7 @@
 <template>
 <div>
-    <div class="login-header" v-cloak>
-        <a href="javascript:history.go(-1)" class="header-back-white"></a>
+    <div class="login-header">
+        <router-link to="index" class="header-back-white"></router-link>
         <img src="../m-images/login-bg.jpg" />
    </div>
    <div class="login-main" v-cloak>
