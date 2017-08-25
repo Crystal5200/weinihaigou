@@ -666,9 +666,7 @@ export default {
 }
 .goods-item .goods-show {
     display: -webkit-flex;
-    display: flex;
     -webkit-align-items: center;
-    align-items: center;
     height: 9rem;
     padding: 0 1rem;
     overflow: hidden;
