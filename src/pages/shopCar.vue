@@ -279,7 +279,7 @@ export default {
                 item.shopCarList.forEach(function( item, index, arr) {
                     var goodsMoney = 0;
                     // 正常状态并且是自营包税一仓商品才计算
-                    if ( item.supId == 0 && item.deliveryCode == 1 && item.isStatus ) {
+                    if ( item.saleType == 0 && item.deliveryCode == 1 && item.isStatus ) {
                         if ( item.priceList.length>0 ) {
                             var num = item.num,
                                 price = 0;
@@ -324,7 +324,7 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
                     // 正常状态并且是自营包税一仓商品才计算
-                    if ( item.selected && item.deliveryCode == 1 && item.supId == 0 && item.isStatus ) {
+                    if ( item.selected && item.deliveryCode == 1 && item.saleType == 0 && item.isStatus ) {
                         oThis.noMailMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
                     }
                 });
@@ -448,7 +448,7 @@ export default {
         addCar(goodsId, skuId, num) {
             $.ajax({
                 type : "POST",
-                url :  API.addShopCar,
+                url :  '/trade/addShopCar.shtml',
                 dataType : 'json',
                 data:{
                     goodsId: goodsId,
@@ -666,7 +666,9 @@ export default {
 }
 .goods-item .goods-show {
     display: -webkit-flex;
+/*     display: flex; */
     -webkit-align-items: center;
+    /* align-items: center; */
     height: 9rem;
     padding: 0 1rem;
     overflow: hidden;
