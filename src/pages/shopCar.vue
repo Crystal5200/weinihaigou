@@ -204,10 +204,11 @@ export default {
             }
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
-                    item.selected = flag;
+                    if ( item.isStatus ) {
+                        item.selected = flag;
+                    }
                 });
             });
-            this.checkAllChoose();
             this.cal();
         },
 
@@ -279,7 +280,7 @@ export default {
                 item.shopCarList.forEach(function( item, index, arr) {
                     var goodsMoney = 0;
                     // 正常状态并且是自营包税一仓商品才计算
-                    if ( item.saleType == 0 && item.deliveryCode == 1 && item.isStatus ) {
+                    if ( item.saleType == 0 && item.deliveryCode == 1 ) {
                         if ( item.priceList.length>0 ) {
                             var num = item.num,
                                 price = 0;
@@ -324,7 +325,7 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
                     // 正常状态并且是自营包税一仓商品才计算
-                    if ( item.selected && item.deliveryCode == 1 && item.saleType == 0 && item.isStatus ) {
+                    if ( item.selected && item.deliveryCode == 1 && item.saleType == 0 ) {
                         oThis.noMailMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
                     }
                 });
@@ -356,7 +357,7 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
                     // console.log(item.status);
-                    if ( item.selected && item.isStatus ) {
+                    if ( item.selected ) {
                         oThis.selectedGoodsMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
                     }
                 });
@@ -372,7 +373,7 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 goodsMoney = goodsNum = 0;
                 item.shopCarList.forEach(function( item, index, arr) {
-                    if ( item.selected && item.isStatus ) {
+                    if ( item.selected ) {
                         goodsMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
                         goodsNum += parseFloat(item.num);
                     }
