@@ -5,12 +5,12 @@
             <router-link :to="'/goodsDetails?goodsNo=' + data.goodsNo">
                 <div v-if="data.count==0" class="no-goods">已抢光</div>
                 <div class="goods-img">
-                    <img src="../m-images/error.jpg" v-bind:data-src="data.imgUrl2" width="100%" onerror='this.src="/m-images/error.jpg"' />
+                    <img src="../m-images/error.jpg" v-bind:data-src="data.imgUrl" width="100%" onerror='this.src="/m-images/error.jpg"' />
                 </div>
-                <p class="goods-der"><span class="activity" v-html="data.couponPolicyName" v-if="data.couponPolicyName &&getNowTime(nowTime) > getNowTime(data.startTime) && getNowTime(nowTime) < getNowTime(data.endTime)"></span><span v-html="data.goodsName2"></span></p>
+                <p class="goods-der"><span class="activity" v-html="data.couponPolicyName" v-if="data.couponPolicyName &&getNowTime(nowTime) > getNowTime(data.startTime) && getNowTime(nowTime) < getNowTime(data.endTime)"></span><span v-html="data.goodsName"></span></p>
                 <div class="goods-price">
-                    <ins class="current-price">¥<span v-html="data.skuPrice.toFixed(2)"></span></ins>
-                    <del class="original-price">¥<span v-html="data.marketPrice.toFixed(2)"></span></del>
+                    <ins class="current-price">¥<span v-html="parseFloat(data.mallPrice).toFixed(2)"></span></ins>
+                    <del class="original-price">¥<span v-html="parseFloat(data.marketPrice).toFixed(2)"></span></del>
                 </div>
             </router-link>
         </li>
