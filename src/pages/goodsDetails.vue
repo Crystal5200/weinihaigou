@@ -16,24 +16,18 @@
     </div>
     <div class="price-box" >
         <div class="name-share">
-            <p class="name" v-html="goodsObj.goodsName"></p>
+            <p class="name" v-html="goodsDetail.goodsName2"></p>
         </div>
         <div class="price-section-box">
-            <!-- <div class="price-section2" v-if="skuPrice.length">
-                <div class="price-item" v-for="data in skuPrice">
-                    <span class="num-price"><span v-html="data.intervalFirst"></span>-<span v-html="data.intervalLast"></span>件单价</span><br/>
-                    <ins class="current-price">￥<span v-html="data.price.toFixed(2)"></span></ins>
-                    <del class="original-price">￥<span v-html="showSku.marketPrice.toFixed(2)"></span></del>
-                </div>
+            <div class="price-section1" >
+               <ins class="current-price">￥<span v-html="parseFloat(goodsDetail.minPrice).toFixed(2)"></span></ins>
+               <ins class="current-price" v-if="goodsDetail.maxPrice!=goodsDetail.minPrice"> ~ <span v-html="parseFloat(goodsDetail.maxPrice).toFixed(2)"></span></ins>
             </div>
-            <div class="price-section1" v-else>
-               <ins class="current-price">￥<span v-html="showSku.skuPrice.toFixed(2)"></span></ins>
-               <del class="original-price" v-html="showSku.marketPrice.toFixed(2)">￥<span></span></del>
-            </div> -->
+            <p class="original-price-box">价格 ：  <del class="original-price">￥<span v-html="parseFloat(goodsDetail.marketPrice).toFixed(2)"></span></del></p>
             <div class="address">
-                <img v-bind:src="jack(goodsObj.origin)" />
-                <span v-if="goodsObj.origin!=null&&goodsObj.origin!=''"><span v-html="goodsObj.origin"></span><span>原产</span></span>
-                <span><span>由</span><span v-html="goodsObj.supplierWarehouse && goodsObj.supplierWarehouse.warehouseName"></span><span>发货，预计7个工作日左右到达</span></span>
+                <span v-if="goodsDetail.origin!=''">{{goodsDetail.origin}}品牌 </span>
+                <span v-html="deliveryCodeChange(goodsDetail.deliveryCode)"></span>
+                <span>, 预计7个工作日左右到达</span></span>
             </div>
         </div>
     </div>
@@ -79,14 +73,19 @@
         <div class="box-bg"></div>
         <div class="sku-main">
             <div class="sku-header clearfix">
-                <a href="javascript:;" class="box-close"></a>
                 <div class="img-box">
                     <img v-bind:src="showSku.imgUrl2" />
                 </div>
-                <div class="details">
-                    <p>
-                        <span class="money">￥<span  class="sku-price"  v-html="showPrice.toFixed(2)"></span></span>
-                    </p>
+                <div class="details" v-cloak>
+                    <div v-cloak class="price-section2" v-if="skuPrice.length">
+                        <div class="price-item" v-for="data in skuPrice">
+                            <span class="num-price"><span v-html="data.intervalFirst"></span>-<span v-html="data.intervalLast"></span>件单价</span><br/>
+                            <ins class="current-price">￥<span v-html="parseFloat(data.price).toFixed(2)"></span></ins>
+                        </div>
+                    </div>
+                    <div v-cloak class="price-section1" v-else>
+                       <ins class="current-price">￥<span v-html="parseFloat(showSku.skuPrice).toFixed(2)"></span></ins>
+                    </div>
                     <p><span>库存：</span><span class="count"  v-html="showSku.count"></span><span>件</span></p>
                     <p>
                         <span>已选：</span>
@@ -94,18 +93,20 @@
                     </p>
                 </div>
             </div>
+
             <div class="sku-con">
-                <div>
+                <div class="sku-con-main">
                     <p class="sku-con-header">规格分类:</p>
                     <div class="sku-con-items clearfix">
                         <a href="javascript:;"  v-for="data in goodsDetails" v-html="data.skuName" v-bind:skuId='data.skuId' v-bind:skuNo="data.skuNo"></a>
                     </div>
-                    <p class="sku-con-header">数量:</p>
-                    <div>
-                        <num-control :count="count" :number="number" v-on:cb="changeNumber"></num-control>
-                    </div>
+                </div>
+                <div class="num-box">
+                    <span class="sku-con-header">购买数量:</span>
+                    <num-control :count="count" :number="number" v-on:cb="changeNumber"></num-control>
                 </div>
             </div>
+
             <a href="javascript:;" class="sure-add-buy" v-bind:class="{'no-num-buy' : (showSku.count<=0||showSku.status!=1)}" v-on:click="goSure()">确认</a>
         </div>
     </div>
@@ -195,12 +196,6 @@ export default {
         });
     },
 
-    watch : {
-        number : function() {
-            this.getShowPrice();
-        }
-    },
-
     methods : {
 
         // 点击购买
@@ -278,26 +273,6 @@ export default {
             },100);
         },
 
-        getShowPrice() {
-            var oThis = this,
-                number = this.number;
-           if( oThis.skuPrice.length==0 ) {
-                oThis.showPrice = oThis.showSku.skuPrice;
-            } else {
-                oThis.showPrice = oThis.skuPrice[0].price;
-            }
-
-            console.log(oThis.showPrice);
-            oThis.skuPrice.forEach(function(item, index, arr) {
-                if( number>=item.intervalFirst&&number<=item.intervalLast ) {
-                    oThis.showPrice = item.price;
-                }
-                if( number>=arr[arr.length-1].intervalLast ) {
-                    oThis.showPrice = arr[arr.length-1].price;
-                }
-            });
-        },
-
         detailMo() {
             var oThis = this;
             $.ajax({
@@ -314,7 +289,7 @@ export default {
                     oThis.imgList = data.imgList;
                     oThis.origin = data.origin;
                     oThis.activityList = data.activityList;
-                    oThis.goodsDetail = data.detailList[0];
+                    oThis.goodsDetail = data.goodsDetail;
                     oThis.goodsDetails = data.detailList;
                     oThis.showSku = data.detailList[0];
                     oThis.skuId = oThis.showSku.skuId;
@@ -493,52 +468,21 @@ export default {
             return  date.getFullYear()+ '.' + two(date.getMonth()+1) + '.' + two(date.getDate());
         },
 
-        jack : function(county) {
-            switch (county) {
-            case '日本':
-                return '../images/img-tip-jp.png'
-                break;
-            case '神奈川县':
-                return '../images/img-tip-jp.png'
-                break;
-            case '澳大利亚':
-                return '../images/img-tip-as.png'
-                break;
-            case '韩国':
-                return '../images/img-tip-kr.png'
-                break;
-            case '美国':
-                return '../images/img-tip-usa.png'
-                break;
-            case '法国':
-                return '../images/img-tip-fa.png'
-                break;
-            case '德国':
-                return '../images/img-tip-de.png'
-                break;
-            case '荷兰':
-                return '../images/img-tip-hn.png'
-                break;
-            case '马来西亚':
-                return '../images/img-tip-mlxy.png'
-                break;
-            case '新加坡':
-                return '../images/img-tip-xjp.png'
-                break;
-             case '越南':
-                return '../images/img-tip-yn.png'
-                break;
-            case '意大利':
-                return '../images/img-tip-ydl.png'
-                break;
-            case '英国':
-                return '../images/img-tip-yg.png'
-                break;
-            case '中国':
-                return '../images/img-tip-china.png'
-                break;
-            default:
-                return '../images/img-tip-jp.png'
+        deliveryCodeChange : function(code) {
+            switch (code) {
+                case '1' :
+                    return '保税区邮'
+                    break;
+                case '2' :
+                    return '香港直邮'
+                    break;
+                case '4' :
+                    return '海外直邮'
+                    break;
+                case '5' :
+                    return '国内发货'
+                    break;
+
             }
         }
     },
@@ -553,8 +497,14 @@ export default {
 
 <style scoped>
 @import '../css/swiper.min.css';
-
-/*banner寮€濮�*/
+/*banner开始*/
+.shopping-logo span {
+    display: block;
+    text-align: center;
+    line-height: 1.667rem;
+    font-size: 0.75rem;
+    color: #9f2e33;
+}
 .banner {
     position: relative;
     height: 26.667rem;
@@ -607,12 +557,13 @@ export default {
     border:1px solid #9f2e33;
     opacity: 1;
 }
-/*banner缁撴潫*/
+/*banner结束*/
 
-/*浠锋牸鍖洪棿寮€濮�*/
+/*价格区间开始*/
 .price-box {
     padding: 1.25rem;
     background-color: #fff;
+    border-bottom: 1px solid #ebebeb;
 }
 .price-box .name-share {
     display: -webkit-flex;
@@ -627,6 +578,7 @@ export default {
     border-bottom: 1px solid #ebebeb;
 }
 .price-box .name {
+    width: 75%;
     padding-right: 10%;
     box-sizing: content-box;
     overflow: hidden;
@@ -636,6 +588,7 @@ export default {
     -webkit-box-orient: vertical;
     word-break: break-all;
     color: #4d4d4d;
+    border-right: 1px solid #ededed;
     font-size: 1.2rem;
 }
 .price-box .share {
@@ -653,38 +606,12 @@ export default {
     color: #f45e48;
     text-decoration: none;
 }
-.price-box .original-price {
-    font-size: 0.833rem;
+.price-box .original-price-box {
     color: #adadad;
+    font-size: 0.833rem;
 }
-.price-box .price-section2 {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-justify-content: space-between;
-    justify-content: space-between;
-    -webkit-align-items: center;
-    align-items: center;
-}
-.price-box .num-price {
-    display: inline-block;
-    position: relative;
-    margin-bottom: 5px;
-    font-size: 0.667rem;
-    line-height: 1.5;
-    padding: 2px 4px;
-    background-color: #eee;
-    border-radius: 3px;
-}
-.price-box .num-price:after {
-    content: '';
-    position: absolute;
-    left: 5px;
-    bottom: -4px;
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 4px solid #eee;
+.price-box .price-section1 {
+    color: #f45e48;
 }
 .price-box .address {
     margin-top: 0.833rem;
@@ -705,9 +632,9 @@ export default {
 .price-box .price-section2 .price-item:first-child .original-price {
     display: inline-block;
 }
-/*浠锋牸鍖洪棿缁撴潫*/
+/*价格区间结束*/
 
-/*淇冮攢-棰嗗埜寮€濮�*/
+/*促销-领券开始*/
 .goods-prams {
     background-color: #fff;
     margin-top: 0.708rem;
@@ -766,9 +693,9 @@ export default {
     border-radius: 50%;
 }
 
-/*淇冮攢-棰嗗埜缁撴潫*/
+/*促销-领券结束*/
 
-/*鍝佺墝璇︽儏寮€濮�*/
+/*品牌详情开始*/
 .brand {
     margin-top: 0.708rem;
     background: #fff;
@@ -821,9 +748,9 @@ export default {
     width: 7rem;
     margin-bottom: 1.5rem;
 }
-/*鍝佺墝璇︽儏缁撴潫*/
+/*品牌详情结束*/
 
-/*鍥炬枃璇存槑寮€濮�*/
+/*图文说明开始*/
 .goods-details {
     margin-top: 0.708rem;
     border-top: 1px solid #ebebeb;
@@ -839,13 +766,16 @@ export default {
     display: block;
     min-height: 150px;
 }
-/*鍥炬枃璇存槑缁撴潫*/
+/*图文说明结束*/
 
-/*鍟嗗搧搴曢儴寮€濮�*/
+/*商品底部开始*/
 .goods-footer {
     display: -webkit-flex;
+    display: flex;
     -webkit-justify-content: space-between;
+    justify-content: space-between;
     -webkit-align-items: center;
+    align-items: center;
     position: fixed;
     left: 0;
     bottom: 0;
@@ -891,9 +821,17 @@ export default {
     background-color: #9f2e33;
     color: #fff;
 }
-/*鍟嗗搧搴曢儴缁撴潫*/
+.goods-footer .unable {
+    background: #ccc;
+    color: #fff;
+}
+.goods-footer .unable1 {
+    background: #fff;
+    color: #ccc;
+}
+/*商品底部结束*/
 
-/*搴曢儴寮瑰嚭妗嗗紑濮�*/
+/*底部弹出框开始*/
 .show {
     -webkit-transform: translateY(0) !important;
 }
@@ -973,7 +911,7 @@ export default {
     overflow-scrolling: touch;
 }
 
-/*鍒嗕韩寮€濮�*/
+/*分享开始*/
 .share-box {
     display: none;
 }
@@ -1046,9 +984,9 @@ export default {
     word-break: break-all;
     font-size: 0.917rem;
 }
-/*鍒嗕韩缁撴潫*/
+/*分享结束*/
 
-/*璐拱sku寮€濮�*/
+/*购买sku开始*/
 .sku-box {
     display: none;
 }
@@ -1067,7 +1005,7 @@ export default {
 .sku-box .sku-header {
     max-width: 640px;
     margin: 0 auto;
-    padding: 0 1.417rem;
+    padding: 0 1rem 1rem;
     border-bottom: 1px solid #e6e6e6;
 }
 .sku-box .sku-header .box-close {
@@ -1087,13 +1025,13 @@ export default {
     border-radius: 4px;
 }
 .sku-box .details {
-    float: left;
-    margin: 0.917rem 0 0 1rem;
+    float:left;
+    margin: .5rem 0 0 1rem;
     color: #414141;
     line-height: 1.4;
 }
 .sku-box .details span {
-    vertical-align: middle;
+    /*vertical-align: middle;*/
 }
 .sku-box .details .format {
     display: inline-block;
@@ -1118,13 +1056,22 @@ export default {
     max-width: 640px;
     margin: 0 auto;
     height: 16.667rem;
-    padding: .5rem 1.417rem;
-    overflow-y: auto;
+}
+.sku-box .sku-con-main {
+    padding: 0 1.333rem;
+}
+.sku-box .num-box {
+    padding: 0 1.333rem;
+    border-top: 1px solid #e6e6e6;
 }
 .sku-box .sku-con-header {
+    display: inline-block;
+    margin-top: .8rem;
     margin-bottom: 0.417rem;
 }
 .sku-box .sku-con-items {
+    height: 4.5rem;
+    overflow-y: auto;
     margin-left:-0.833rem;
     margin-bottom: 0.833rem;
 }
@@ -1145,6 +1092,12 @@ export default {
 .sku-box .sku-con-items .active:before {
 
 }
+.quantity-selector {
+    float: right;
+    width: 10rem;
+    line-height: 2.6rem;
+    border:1px solid #757575;
+}
 .sku-box  .sure-add-buy {
     position: absolute;
     bottom: 0;
@@ -1162,9 +1115,9 @@ export default {
     border: none;
     color: #fff;
 }
-/*璐拱sku缁撴潫*/
+/*购买sku结束*/
 
-/*鏈堢悆寮€濮�*/
+/*月球开始*/
 .moon-box {
     /*display: none;*/
 }
@@ -1226,7 +1179,7 @@ export default {
 .moon-btn a:first-child {
     border-right: 1px solid #ebebeb;
 }
-/*鏈堢悆缁撴潫*/
+/*月球结束*/
 
 
 #url {
@@ -1237,12 +1190,145 @@ export default {
     opacity: 0;
 }
 
+/*sku弹框阶梯价格开始*/
+.details .price-section-box {
+    padding-top:0.958rem;
+}
+.details .current-price {
+    margin-right: 3px;
+    font-size: 1.333rem;
+    color: #f45e48;
+    text-decoration: none;
+}
+.details .original-price {
+    font-size: 0.833rem;
+    color: #adadad;
+}
+.details .price-section2 {
+    width: 17rem;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    -webkit-align-items: center;
+    align-items: center;
+}
+.details .num-price {
+    display: inline-block;
+    position: relative;
+    margin-bottom: 5px;
+    font-size: 0.667rem;
+    line-height: 1.5;
+    padding: 2px 4px;
+    background-color: #eee;
+    border-radius: 3px;
+    transform: scale(.8);
+}
+.details .num-price:after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    bottom: -4px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 4px solid #eee;
+}
+/*sku弹框阶梯价格结束*/
 
+/*地址选择开始*/
+.port-dispatch-box {
+    position: relative;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    -webkit-align-items: center;
+    align-items: center;
+    height: 3.333rem;
+    border-top: 1px solid #ededed;
+    border-bottom: 1px solid #ededed;
+    background: #fff;
+    margin: 1rem 0;
+    padding: 0 1.25rem;
+    color: #1a1a1a;
+}
+.port-dispatch-box .port-dispatch {
+    height: 1rem;
+    padding-left: 1rem;
+    background: url(../m-images/icon2.png) no-repeat 0 -24.208rem / 33.333rem 33.333rem;
+    color: #999;
+}
+.port-dispatch-box i {
+    position: absolute;
+    right: 1.25rem;
+    top:1.25rem;
+    width: 0.417rem;
+    height: 1rem;
+    background:url(../m-images/icon-week.png) no-repeat 0 -6.042rem / 8.333rem 8.33rem;
+}
+/*地址选择结束*/
 
+/*发货地弹框开始*/
+.departure-box {
+    display: none;
+}
+.departure-box .departure-main {
+    position: fixed;
+    z-index: 100;
+    right: 0;
+    top: 0;
+    width: 15rem;
+    height: 100%;
+    background: #fff;
+    -webkit-transform: translateX(15rem);
+    transform: translateX(15rem);
+    -webkit-transition: -webkit-transform .4s cubic-bezier(0,0,.25,1);
+}
+.departure-box .address-item {
+    display: block;
+    padding-left: 2rem;
+    line-height: 2.5rem;
+    color: #333;
+    text-decoration: none;
+    border-top: 1px solid #eee;
+}
+.departure-box .address-wrap {
+    height: 92%;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.departure-box .address-header {
+    height: 8%;
+    line-height: 4rem;
+    font-size: 1.3rem;
+    text-align: center;
+}
+.departure-box .active {
+    color: #ff6a00;
+}
+/*发货地弹框结束*/
 
+.show-main {
+    -webkit-transform: translateY(0) !important;
+    transform: translateY(0) !important;
+}
 
-
-
+/*地址没有商品开始*/
+.no-dispatch {
+    position: fixed;
+    z-index: 5;
+    left: 0;
+    bottom: 45px;
+    width: 100%;
+    line-height: 2.857rem;
+    background: #be6f72;
+    opacity: .9;
+    text-align: center;
+    color: #fff;
+}
+/*地址没有商品结束*/
 
 </style>
 
