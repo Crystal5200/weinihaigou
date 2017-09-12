@@ -99,7 +99,7 @@ export default {
                         //第一次加载
                         if( oThis.changePage()===1 ) {
                             oThis.goodsList = data.list;
-                            oThis.pageTotal = data.pageTotal;
+                            oThis.pageTotal = data.pageTotal || data.pages;
                             // 没有数据
                             if( oThis.goodsList.length===0 ) {
                                 oThis.isLoading = false;
