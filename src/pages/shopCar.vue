@@ -35,14 +35,14 @@
                     </a>
 
                     <router-link :to="'/goodsDetails?goodsNo=' + c.goodsNo" class="goods-img">
-                        <img v-bind:src="c.imgUrl2"/>
+                        <img v-bind:src="c.imgUrl"/>
                         <div v-if='c.isShow==0 || c.status!=1' class="no-goods" v-bind:class="{'opacity':(c.isShow==0||c.status!=1)}">已下架</div>
                         <div v-else >
                             <div class="no-goods" v-if="c.realStock <= 0" v-bind:class="{'opacity':(c.realStock <= 0)}">已抢光</div>
                         </div>
                     </router-link>
                     <div class="goods-link">
-                        <router-link :to="'/goodsDetails?goodsNo=' + c.goodsNo"  v-html="c.goodsName2" class="goods-link-main"></router-link>
+                        <router-link :to="'/goodsDetails?goodsNo=' + c.goodsNo"  v-html="c.goodsName" class="goods-link-main"></router-link>
                         <p class="norms-tax"><span>规格:</span><span v-html="c.skuName" class="com-over norms"></span></p>
                         <p class="norms-tax"><span>仓库:</span><span v-html="c.warehouseName" class="com-over norms"></span></p>
                         <p class="price">¥<span class="every-price" v-html='c.skuPrice.toFixed(2)'></span></p>
@@ -143,7 +143,6 @@ export default {
             noMailMoney : 0,//不包邮商品总金额
             discountAmount : 0,//总优惠金额
             amountMoney : 0,//总金额
-
         }
     },
 
@@ -259,11 +258,12 @@ export default {
         calEveryGoodsPrice() {
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
+                    // 如果该sku有区间价格则取对应区间价
                     if ( item.priceList.length>0 ) {
                         var num = item.num;
                         for ( var i = 0, len = item.priceList.length; i < len; i++ ) {
                             if (  num >= item.priceList[i]['intervalFirst'] && num <= item.priceList[i]['intervalLast'] ) {
-                                item.skuPrice = item.priceList[i]['price'];
+                                item.skuPrice = parseFloat(item.priceList[i]['price']);
                                 break;
                             }
                         }
@@ -274,31 +274,24 @@ export default {
 
         // 计算商品税费(根据运营规则，只计算保税一仓)
         calEveryTaxMoney() {
-            var item1 = null;
+            var item1 = null,
+                oThis = this;
             this.carList.forEach(function( item, index, arr) {
                 item1 = item;
                 item.shopCarList.forEach(function( item, index, arr) {
-                    var goodsMoney = 0;
-                    // 正常状态并且是自营包税一仓商品才计算
+                    // 正常状态并且只计算保税区且不是包邮包税的商品
                     if ( item.saleType == 0 && item.deliveryCode == 1 ) {
-                        if ( item.priceList.length>0 ) {
-                            var num = item.num,
-                                price = 0;
-                            for ( var i = 0, len = item.priceList.length; i < len; i++ ) {
-                                if (  num >= item.priceList[i]['intervalFirst'] && num <= item.priceList[i]['intervalLast'] ) {
-                                    price = item.priceList[i]['price'];
-                                    break;
-                                }
-                            }
-                            goodsMoney = parseFloat(price) * parseFloat(num);
-                        } else {
-                            goodsMoney = parseFloat(item.skuPrice) * parseFloat(item.num);
-                        }
-                        item.goodsTax = goodsMoney * item.tax;
+                        item.goodsTax = item.skuPrice * item.num * item.tax;
                         if ( item1.isMeet ) {
-                            item.goodsTax *= (1 - item1.discount/item1.goodsAllMoney);
+                            if ( item1.couponPolicyType == 3 ) {
+                                item.goodsTax *= (1 - ( item1.expensiveMoeny - item1.discount )/item1.activityMoney);
+                            } else {
+                                item.goodsTax *= (1 - item1.discount/item1.activityMoney);
+                            }
                         }
-                        item.goodsTax = common.toFixed(item.goodsTax, 2);
+                        item.goodsTax = item.goodsTax;
+                    } else {
+                        item.goodsTax = 0.00;
                     }
                 });
             });
@@ -311,7 +304,7 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
                     if ( item.selected ) {
-                        oThis.selectedTaxMoney += item.goodsTax;
+                        oThis.selectedTaxMoney += parseFloat(item.goodsTax);
                     }
                 });
             });
@@ -324,13 +317,12 @@ export default {
             this.selectedFreightMoney = 0;
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
-                    // 正常状态并且是自营包税一仓商品才计算
                     if ( item.selected && item.deliveryCode == 1 && item.saleType == 0 ) {
-                        oThis.noMailMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
+                        oThis.noMailMoney += item.skuPrice * item.num;
                     }
                 });
             });
-            this.selectedFreightMoney = (  this.noMailMoney == 0 || this.noMailMoney > this.postpolicy.limitMoney) ? 0 : this.postpolicy.postage;
+            this.selectedFreightMoney = (  this.noMailMoney == 0 || this.noMailMoney - this.discountAmount >= this.postpolicy.limitMoney ) ? 0 : this.postpolicy.postage;
         },
 
         // 计算每个活动下的商品总额
@@ -340,10 +332,10 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 if ( item.isMeet ) {
                     var item1 = item;
-                    item1.goodsAllMoney = 0;
+                    item1.activityMoney = 0;
                     item.shopCarList.forEach(function( item, index, arr) {
                         if ( item.selected ) {
-                            item1.goodsAllMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
+                            item1.activityMoney += item.skuPrice * item.num;
                         }
                     });
                 }
@@ -368,23 +360,61 @@ export default {
         checkIsMeet() {
             var oThis = this,
                 goodsMoney = 0,
-                goodsNum = 0;
+                goodsNum = 0,
+                goodsList = [];
             oThis.discountAmount = 0;
             this.carList.forEach(function( item, index, arr) {
-                goodsMoney = goodsNum = 0;
-                item.shopCarList.forEach(function( item, index, arr) {
-                    if ( item.selected ) {
-                        goodsMoney += parseFloat(item.skuPrice) * parseFloat(item.num);
-                        goodsNum += parseFloat(item.num);
+                var item1 = item;
+                if ( item.couponPolicyId>0 ) {
+                    goodsMoney = goodsNum = 0;
+                    goodsList = [];
+                    item.shopCarList.forEach(function( item, index, arr) {
+                        if ( item.selected ) {
+                            var money = item.skuPrice * item.num;
+                            goodsMoney += money;
+                            goodsNum += item.num;
+                            goodsList.push({
+                                money : money,
+                                skuPrice : item.skuPrice,
+                                num : parseInt(item.num)
+                            });
+                        }
+                    });
+
+                    /*type1 : 满多少元减多少元
+                    type2 : 满多少件减多少元
+                    type3 : 多少件多少元(2件99，取该活动被选中商品中价格最高(单价)的2件参加活动，其他的不参加)*/
+                    item.amount1 = item.amount - goodsMoney;
+                    item.goodsNum = item.amount - goodsNum;
+                    if ( (item.couponPolicyType == 1 && item.amount1<=0) || ( item.couponPolicyType == 2 && item.goodsNum <=0 ) ) {
+                        item.isMeet = true;
+                        oThis.discountAmount += item.discount;
+                    } else if ( item.couponPolicyType == 3 && item.goodsNum <= 0 ) {
+                        item.isMeet = true;
+                        goodsList = goodsList.sort( oThis.compare('skuPrice') );
+                        console.log( goodsList );
+                        var allNum = 0;
+                        item1.expensiveMoeny = 0;
+                        goodsList.forEach(function( item, index, arr ) {
+                            if ( allNum < item1.amount ) {
+                                for ( var i = 1; i <= item.num; i++ ) {
+                                    allNum += 1;
+                                    if ( allNum <= item1.amount ) {
+                                        item1.expensiveMoeny += item.skuPrice;
+                                    }
+                                }
+                            }
+                        });
+
+                        // 判断X件商品总金额是非小于XX元
+                        if ( item.expensiveMoeny < item.discount ) {
+                            item.expensiveMoeny = item.discount;
+                        }
+                        oThis.discountAmount += (item.expensiveMoeny - item.discount);
                     }
-                });
-                item.amount1 = item.amount - goodsMoney;
-                item.goodsNum = item.amount - goodsNum;
-                if ( item.amount1<=0 || item.goodsNum <=0 ) {
-                    item.isMeet = true;
-                    oThis.discountAmount += parseFloat(item.discount);
-                } else {
-                    item.isMeet = false;
+                    else {
+                        item.isMeet = false;
+                    }
                 }
             });
         },
@@ -449,7 +479,7 @@ export default {
         addCar(goodsId, skuId, num) {
             $.ajax({
                 type : "POST",
-                url :  '/trade/addShopCar.shtml',
+                url :  API.addShopCar,
                 dataType : 'json',
                 data:{
                     goodsId: goodsId,
@@ -465,7 +495,6 @@ export default {
                         });
                     }
                 }
-
             });
         },
 
@@ -478,19 +507,29 @@ export default {
                 dataType: 'json',
                 success :function(data) {
                     oThis.isLoading = false;
-                    // console.log(data);
+                    console.log(data);
                     if(data.msg) {
                         if ( data.carList ) {
                             data.carList.forEach(function( item, index, arr) {
-                                item.isMeet = false;
-                                item.amount1 = item.amount;
-                                item.goodsNum = item.amount;
-                                item.goodsAllMoney = 0.00;
+                                // 如果有活动才手动添加对应属性
+                                if ( item.couponPolicyId > 0 ) {
+                                    item.isMeet = false;
+                                    item.amount1 = item.amount;
+                                    item.goodsNum = item.amount;
+                                    item.activityMoney = 0.00;
+                                    item.expensiveMoeny = 0.00;
+                                }
+
+                                var index1 = index;
                                 for ( var x in item ) {
                                     item.shopCarList.forEach(function( item, index, arr) {
                                         item.selected = false;
                                         item.goodsTax = 0.00;
                                         item.showPrice = 0.00;
+                                        item.showTax = false;
+                                        item.num = parseInt(item.num);
+                                        item.skuPrice = parseFloat(item.skuPrice);
+                                        item.tax = parseFloat(item.tax);
 
                                         if ( item.isShow==1 && item.status==1 && item.realStock>0 ) {
                                             item.isStatus  = true;
@@ -503,7 +542,6 @@ export default {
                             oThis.calEveryTaxMoney();
                         }
                         oThis.postpolicy = data.postpolicy;
-                        console.log(oThis.carList);
                     } else {
                         $.customTips({
                             msg : "请求错误，请稍后重试"
@@ -525,7 +563,7 @@ export default {
             this.carList.forEach(function( item, index, arr) {
                 item.shopCarList.forEach(function( item, index, arr) {
                     if ( item.selected ) {
-                        skuNos += item.skuNo + ',';
+                        skuNos += item.skuId + ',';
                         num += item.num + ',';
                     }
                 });
