@@ -231,7 +231,7 @@ export default {
             }
             if ( this.isBuy ) {
                 //跳转到支付页面
-                common.setCookie('PALACE_ORDER_SKUNO', this.showSku.skuNo);
+                common.setCookie('PALACE_ORDER_SKUNO', this.showSku.skuId);
                 common.setCookie('PALACE_ORDER_NUMS', this.number);
                 common.setCookie('PALACE_ORDER_COUPONID', "");
                 common.setCookie('PALACE_ORDER_ADDRESS', "");
@@ -489,8 +489,6 @@ export default {
 
     components : {
         numControl
-
-
     }
 }
 </script>
@@ -1329,6 +1327,19 @@ export default {
     color: #fff;
 }
 /*地址没有商品结束*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </style>
 
