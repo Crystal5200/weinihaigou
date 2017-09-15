@@ -55,7 +55,7 @@ http-server -P http://www.weinihaigou.com/
 
 >  如果您不想注册的可以直接用这个账户 用户名 15757135989 密码 123456
 
-> 吕胖胖的博客 http://www.qdfuns.com/house/15098/note
+> 吕胖胖的博客 http://www.qdfuns.com/house/15098.html
 
 # 目标功能
 - [x] 登录、注册 -- 完成
