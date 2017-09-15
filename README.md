@@ -34,6 +34,17 @@ npm run dev
 
 ```
 
+```
+如果你用过npm run build 打包出来dist文件夹，想运行里面的index.html,可以安装下面的指令来(注意需要修改api.js里面的const pxy = '/api' 改成const pxy = '';)
+npm install http-server
+cd dist
+http-server -P http://www.weinihaigou.com/
+
+或者本地开一个nginx，配置nginx.conf就行
+
+
+```
+
 # 说明
 
 >  如果对您有帮助，您可以点右上角 "Star" 支持一下 谢谢！ ^_^
