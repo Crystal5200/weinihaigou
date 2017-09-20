@@ -1,19 +1,21 @@
 <template>
 <div>
     <div class="quantity-selector clearfix">
-        <span class="reduce" @click="reduce()" :class="{disable : this.val==1}">－</span>
-        <input type="text" v-model="val" class="number" @blur="blur()" readonly="true" />
-        <span class="add" @click="add()" :class="{disable : this.val==this.count}">＋</span>
+        <span class="reduce" @click="reduce()" :class="{disable : val==1||count==0}">－</span>
+        <input type="text" v-model="val" class="number" readonly="true" />
+        <span class="add" @click="add()" :class="{disable : val==count||count==0}">＋</span>
     </div>
 </div>
 </template>
+
 
 <script>
 export default {
     props : ['number', 'count', 'index1', 'index2'],
     data : function() {
         return {
-            val :  this.number
+            val :  this.number,
+            realStock : this.count
         }
     },
     watch: {
@@ -30,6 +32,17 @@ export default {
                 index2 : this.index2
             });
         },
+
+        count() {
+            if ( this.count == 0 ) {
+                this.val = 1;
+            }
+            this.$emit('cb', {
+                val : this.val,
+                index1 : this.index1,
+                index2 : this.index2
+            });
+        }
     },
     mounted : function() {
         this.init();
@@ -52,7 +65,7 @@ export default {
         },
         reduce() {
             this.init();
-            if ( this.val - 1 <= 0 ) {
+            if ( this.val - 1 <= 0 || this.count == 0 ) {
                 return;
             }
             this.val -= 1;
@@ -61,11 +74,6 @@ export default {
                 index1 : this.index1,
                 index2 : this.index2
             });
-        },
-        blur() {
-            if ( this.val === '' ) {
-                this.val = 1;
-            }
         },
         init() {
             this.val = parseInt(this.val);
