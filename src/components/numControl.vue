@@ -14,8 +14,7 @@ export default {
     props : ['number', 'count', 'index1', 'index2'],
     data : function() {
         return {
-            val :  this.number,
-            realStock : this.count
+            val :  this.number
         }
     },
     watch: {
@@ -24,7 +23,7 @@ export default {
                 this.val = 1;
             }
             if ( parseInt(this.val) > this.count ) {
-                this.val = this.count;
+                this.val = this.count > 0 ? this.count : 1;
             }
             this.$emit('cb', {
                 val : this.val,
