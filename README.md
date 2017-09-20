@@ -13,7 +13,7 @@ __注：此项目纯属个人瞎搞，正常购买请选择唯妮海购官网。
 
 ## 技术栈
 
-vue2 + vuex + vue-router + webpack + ES6/7 
+vue2 + vue-cli + vuex + vue-router + webpack + ES6/7 
 
 
 ## 关于 数据接口 的说明
@@ -64,7 +64,7 @@ http-server -P http://www.weinihaigou.com/
 - [x] 搜索 -- 完成
 - [x] 搜索结果以及筛选 -- 完成
 - [x] 购物车功能 -- 完成
--    商品详情页 -- （等新接口上线马上就改好）
+- [x]  商品详情页 -- 完成
 - [x] 商家详情页 -- 完成
 - [x] 登录、注册 -- 完成
 - [x] 个人中心 -- 完成
