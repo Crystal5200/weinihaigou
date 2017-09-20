@@ -14,10 +14,13 @@ export default {
     props : ['number', 'count', 'index1', 'index2'],
     data : function() {
         return {
+            // 如果你项修改传入组件的参数，那么就像下面这样写
             val :  this.number
         }
     },
     watch: {
+
+        // 观察组件内部数量的变化，并通过$emit触发父组件的对应事件，从而将子组件数量的变化传递给父组件
         val() {
             if ( !/^\d*$/.test(this.val) || /^0/.test(this.val) ) {
                 this.val = 1;
@@ -32,6 +35,7 @@ export default {
             });
         },
 
+        // 观察父组件的库存变化，从而改变子组件的数量值（主要是当父组件的库存为0时，重置子组件的数量为1，并通过触发并通过$emit触发父组件的对应事件，从而将子组件数量的变化传递给父组件）
         count() {
             if ( this.count == 0 ) {
                 this.val = 1;
